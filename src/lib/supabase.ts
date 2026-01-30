@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -10,14 +10,33 @@ export const isSupabaseConfigured = () => {
          supabaseUrl !== 'https://your-project.supabase.co';
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// Get appropriate storage based on platform
+const getStorage = () => {
+  if (Platform.OS === 'web') {
+    return typeof window !== 'undefined' ? window.localStorage : undefined;
+  }
+  // For native, we'll use AsyncStorage but import it dynamically
+  try {
+    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    return AsyncStorage;
+  } catch {
+    return undefined;
+  }
+};
+
+// Create client with placeholder if not configured (will be caught by isSupabaseConfigured check)
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key',
+  {
+    auth: {
+      storage: getStorage(),
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  }
+);
 
 // Types for our database
 export interface Profile {
