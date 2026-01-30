@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from './src/lib/supabase';
-import { CheckinScreen } from './src/screens/CheckinScreen';
+import { TabNavigator } from './src/navigation/TabNavigator';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { Session } from '@supabase/supabase-js';
 
@@ -34,10 +36,14 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="dark" />
-      {session ? <CheckinScreen /> : <AuthScreen />}
-    </View>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <View style={styles.container}>
+          <StatusBar style="dark" />
+          {session ? <TabNavigator /> : <AuthScreen />}
+        </View>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
