@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CheckinScreen } from '../screens/CheckinScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
 import { SocialScreen } from '../screens/SocialScreen';
+import { BuddiesScreen } from '../screens/BuddiesScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -55,6 +56,15 @@ export function TabNavigator() {
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon emoji="👥" label="Gruppen" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Buddies"
+        component={BuddiesScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="💜" label="Buddies" focused={focused} />
           ),
         }}
       />
