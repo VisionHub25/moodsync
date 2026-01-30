@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase, isSupabaseConfigured } from './src/lib/supabase';
 import { TabNavigator } from './src/navigation/TabNavigator';
 import { AuthScreen } from './src/screens/AuthScreen';
+import { DemoProvider } from './src/context/DemoContext';
 import { Session } from '@supabase/supabase-js';
 
 export default function App() {
@@ -67,14 +68,16 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <View style={styles.container}>
-          <StatusBar style="dark" />
-          {session || demoMode ? <TabNavigator /> : <AuthScreen />}
-        </View>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <DemoProvider initialDemoMode={demoMode}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <View style={styles.container}>
+            <StatusBar style="dark" />
+            {session || demoMode ? <TabNavigator /> : <AuthScreen />}
+          </View>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </DemoProvider>
   );
 }
 

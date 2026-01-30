@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase, Streak } from '../lib/supabase';
+import { supabase, Streak, isSupabaseConfigured } from '../lib/supabase';
 
 interface UseStreakReturn {
   streak: Streak | null;
@@ -8,12 +8,27 @@ interface UseStreakReturn {
   refresh: () => Promise<void>;
 }
 
+// Demo streak data
+const DEMO_STREAK: Streak = {
+  user_id: 'demo-user',
+  current_streak: 5,
+  longest_streak: 12,
+  last_checkin: new Date().toISOString().split('T')[0],
+};
+
 export function useStreak(): UseStreakReturn {
   const [streak, setStreak] = useState<Streak | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchStreak = useCallback(async () => {
+    // Demo mode - return mock streak
+    if (!isSupabaseConfigured()) {
+      setStreak(DEMO_STREAK);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 

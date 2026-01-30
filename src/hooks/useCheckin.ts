@@ -1,6 +1,12 @@
-import { useState, useCallback } from 'react';
-import { supabase, Checkin } from '../lib/supabase';
+import { useState, useCallback, useContext } from 'react';
+import { supabase, Checkin, isSupabaseConfigured } from '../lib/supabase';
 import { MoodEmoji, MoodTagId } from '../constants/tags';
+
+// Demo context for mock data
+let demoAddCheckin: ((checkin: Partial<Checkin>) => Checkin) | null = null;
+export const setDemoAddCheckin = (fn: (checkin: Partial<Checkin>) => Checkin) => {
+  demoAddCheckin = fn;
+};
 
 interface CheckinData {
   emoji: MoodEmoji;
@@ -23,6 +29,12 @@ export function useCheckin(): UseCheckinReturn {
   const [todayCheckin, setTodayCheckin] = useState<Checkin | null>(null);
 
   const fetchTodayCheckin = useCallback(async () => {
+    // Demo mode - no fetch needed
+    if (!isSupabaseConfigured()) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -61,6 +73,21 @@ export function useCheckin(): UseCheckinReturn {
   const submitCheckin = useCallback(async (data: CheckinData): Promise<Checkin | null> => {
     setIsLoading(true);
     setError(null);
+
+    // Demo mode - create mock checkin
+    if (!isSupabaseConfigured()) {
+      const demoCheckin: Checkin = {
+        id: `demo-${Date.now()}`,
+        user_id: 'demo-user',
+        emoji: data.emoji,
+        sentiment_score: data.sentimentScore,
+        tags: data.tags,
+        created_at: new Date().toISOString(),
+      };
+      setTodayCheckin(demoCheckin);
+      setIsLoading(false);
+      return demoCheckin;
+    }
 
     try {
       const { data: { user } } = await supabase.auth.getUser();

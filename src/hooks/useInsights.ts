@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase, Checkin } from '../lib/supabase';
+import { supabase, Checkin, isSupabaseConfigured } from '../lib/supabase';
 
 interface DayData {
   date: string;
@@ -33,12 +33,61 @@ interface UseInsightsReturn {
 
 const DAYS_OF_WEEK = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
+// Generate demo insights data
+function generateDemoInsights(): Insights {
+  const emojis = ['😊', '😌', '🙂', '😢', '😤', '🥰', '😴'];
+  const tags = ['work', 'family', 'exercise', 'sleep', 'friends'];
+
+  const weekData: DayData[] = [];
+  const monthData: DayData[] = [];
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    const score = 0.3 + Math.random() * 0.6;
+
+    const dayData = {
+      date: dateStr,
+      score,
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+      tags: tags.slice(0, Math.floor(Math.random() * 3) + 1),
+    };
+
+    monthData.push(dayData);
+    if (i < 7) weekData.push(dayData);
+  }
+
+  return {
+    weekData,
+    monthData,
+    tagCorrelations: [
+      { tag: 'exercise', avgScore: 0.85, count: 8 },
+      { tag: 'friends', avgScore: 0.78, count: 6 },
+      { tag: 'family', avgScore: 0.72, count: 10 },
+      { tag: 'work', avgScore: 0.55, count: 15 },
+      { tag: 'sleep', avgScore: 0.48, count: 5 },
+    ],
+    bestDay: 'Samstag',
+    worstDay: 'Montag',
+    averageScore: 0.68,
+    totalCheckins: 25,
+  };
+}
+
 export function useInsights(): UseInsightsReturn {
   const [insights, setInsights] = useState<Insights | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchInsights = useCallback(async () => {
+    // Demo mode - return mock data
+    if (!isSupabaseConfigured()) {
+      setInsights(generateDemoInsights());
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
